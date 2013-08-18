@@ -48,10 +48,40 @@ class Recommendation
     # nameとの類似性スコアと相手の名前を取得する
     #   similaliry 相関値関数の選択 
     #   n          出力数
-    def top_matches prefs,name,n=3,similarity=:sim_pearson
+    def top_matches prefs,name,n=-1,similarity=:sim_pearson
         scores = (prefs.keys - [name]).map { |other|
             [self.send(similarity, prefs, name, other), other] 
         }
-        return scores.sort.reverse[0...n]
+        return scores.sort.reverse[0...(n < 0 ? scores.size : n)]
+    end
+
+    def get_recommendations prefs,name,n=-1,similarity=:sim_pearson
+        totals = {}
+        sim_sums = {}
+        prefs.each do |other,scores|
+            next if other == name
+
+            sim = self.send(similarity, prefs, name, other)
+
+            next if sim <= 0
+
+            scores.each do |item,val|
+                # まだ見ていない作品の得点を算出
+                if prefs[name][item].nil?
+                    totals[item] ||= 0
+                    totals[item] += val*sim
+
+                    # 類似度の合計もとる
+                    sim_sums[item] ||= 0
+                    sim_sums[item] += sim
+                end
+            end
+        end
+
+        # 正規化したリストを作る
+        rankings = totals.keys.map { |item| 
+            [totals[item].to_f/sim_sums[item], item] }
+
+        return rankings.sort.reverse[0...( n<0 ? rankings.size : n)]
     end
 end

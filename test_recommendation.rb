@@ -99,4 +99,19 @@ describe "Test recommendation" do
         }
         expect(rec.top_matches(prefs, "斎藤",1,:sim_distance)).to eq([[0.2,"渡辺"]])
     end
+    it "test get_recommendations sample" do
+        rec = Recommendation.new
+        prefs = { 
+            "斎藤"=> { "謎解き"=> 4, "相棒"=> 5, "真夏の方程式"=> 4 }, 
+            "山田"=> { "謎解き"=> 3, "相棒"=> 4, "真夏の方程式"=> 2, "坂の上から"=> 5 },
+            "岡田"=> { "謎解き"=> 5, "相棒"=> 2, "真夏の方程式"=> 4 },
+            "石川"=> { "謎解き"=> 2, "相棒"=> 4, "真夏の方程式"=> 3 },
+            "富田"=> { "男はつらいよ"=> 5, "謎解き"=> 5, "相棒"=>1,"真夏の方程式"=> 1 },
+            "大島"=> { "男はつらいよ"=> 2, "謎解き"=> 3, "相棒"=>5,"真夏の方程式"=> 2 },
+            "渡辺"=> { "謎解き"=> 4, "相棒"=>3,"真夏の方程式"=> 4,"坂の上から"=>4,"男はつらいよ"=>1 }
+        }
+        expect(rec.get_recommendations(prefs, "斎藤")).not_to be_empty
+        expect(rec.get_recommendations(prefs, "山田")).not_to be_empty
+        expect(rec.get_recommendations(prefs, "渡辺", 1)).to be_empty
+    end
 end
